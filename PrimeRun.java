@@ -85,18 +85,16 @@ public class PrimeRun implements Runnable{
 	       
 	       this.br = new BufferedReader(new InputStreamReader(is));
 	      
-	       this.full_request = br.readLine().split("\\s+")[1].substring(1); //GET
+	       
+	       this.full_request = br.readLine().split("\\s+",-1)[1].substring(1); //GET
 	       this.file_request = this.full_request.split("\\?",-1)[0]; //FILE+EXT
-	       this.file_tokens = this.file_request.split("\\.(?=[^\\.]+$)"); //FILE+EXT split
+	       this.file_tokens = this.file_request.split("\\.(?=[^\\.]+$)",-1); //FILE+EXT split
 	       
 	       // CHECK IF FILETYPE
 	       if (this.file_tokens.length > 1){
 	    	   
 	    	   this.filetype = new String(this.file_tokens[1]);
 	    	   
-	       }else{
-	    	   
-	    	   this.filetype = "";
 	       }
 	       
 	       //CHECK IF PARAMETERS
@@ -156,7 +154,17 @@ public class PrimeRun implements Runnable{
 		    	   
 		       }else if(this.filetype.equalsIgnoreCase("txt")){
 		    	   
-		    	   //TXT
+		    	   this.type = "Content-Type: text/plain\n\n";
+			       
+			       if((this.parameters != null)){
+			    	   	
+			    	   if (this.parameters.containsKey("zip")){
+			    		   this.fullData = zipBytes(this.file_request,this.fullData);
+			    		   this.type = "Content-Type: application/zip\nContent-Disposition: filename=\""+(file_request)+".zip\"\n\n";
+			    		   
+			    	   }
+			    	    
+			       }
 		    	   
 		       }else if(this.filetype.equalsIgnoreCase("jpg") || this.filetype.equalsIgnoreCase("jpeg")){
 		    	   
@@ -172,7 +180,7 @@ public class PrimeRun implements Runnable{
 			    	   }
 			    	    
 			       }
-							    	   
+
 		       }else if(this.filetype.equalsIgnoreCase("png")){
 			       
 			       
