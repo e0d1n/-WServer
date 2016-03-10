@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -39,7 +40,7 @@ public class PrimeRun implements Runnable{
 	/////////////////////////////////
 	
 	public static byte[] zipBytes(String filename, byte[] input) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(input.length);
 		ZipOutputStream zos = new ZipOutputStream(baos);
 		ZipEntry entry = new ZipEntry(filename);
 		entry.setSize(input.length);
@@ -50,6 +51,15 @@ public class PrimeRun implements Runnable{
 		return baos.toByteArray(); 
 	}
 	
+	public static byte[] gzipBytes(byte[] data) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(data.length);
+		GZIPOutputStream gzip = new GZIPOutputStream(bos);
+		gzip.write(data);
+		gzip.close();
+		byte[] compressed = bos.toByteArray();
+		bos.close();
+		return compressed;
+	}
 	
 	public static String html2text(String html) {
 	    return Jsoup.parse(html).text();
@@ -108,6 +118,8 @@ public class PrimeRun implements Runnable{
 		    	   
 		    	   this.filetype = new String(this.file_tokens[1]);
 		    	   
+		       }else{
+		    	   this.filetype = "";
 		       }
 		       
 		       //CHECK IF PARAMETERS
@@ -243,6 +255,25 @@ public class PrimeRun implements Runnable{
 		    	   					+ "wjSZNhj8LSHgLgEoQFwPBiQq7Cy3R7WaZmrU8gsN9GhMX5iKHbCqdw+oFc2vHBoF+"
 		    	   					+ "6RIRPg233rdfFwniB7Uf845+A5f4AtS30m043cXEAAAAASUVORK5CYII=\">";
 		    	   
+		    	   String img_comp = "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAWC"
+		    	   					+ "AIAAABCPVsWAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6A"
+		    	   					+ "AAdTAAAOpgAAA6mAAAF3CculE8AAAB1WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAA"
+		    	   					+ "APHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1Q"
+		    	   					+ "IENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cud"
+		    	   					+ "zMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2"
+		    	   					+ "NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHR"
+		    	   					+ "wOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx0aWZmOkNvbXBy"
+		    	   					+ "ZXNzaW9uPjE8L3RpZmY6Q29tcHJlc3Npb24+CiAgICAgICAgIDx0aWZmOk9yaWVud"
+		    	   					+ "GF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgICAgIDx0aWZmOlBob3RvbW"
+		    	   					+ "V0cmljSW50ZXJwcmV0YXRpb24+MjwvdGlmZjpQaG90b21ldHJpY0ludGVycHJldGF"
+		    	   					+ "0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6"
+		    	   					+ "eG1wbWV0YT4KAtiABQAAAPVJREFUOBGNk+0ZgyAMhKWPG8FMMJPOJDPZQ5ojScXWH"
+		    	   					+ "3oh94YPQzjPc5EnpSSyfY/j0KHRwPjEGLvugiENFC9TwwaYzc3P/BMG04z8gc3Ie6"
+		    	   					+ "zWiuWFEPobMDRX2AR3CcEzMA4JtHOVQfOFA/G+7xwtpVBDvApmt7+L6Zwz9RApAZG"
+		    	   					+ "9zUkDi00wVJOhUdgpZVAY/pLzqRDHpaLFYC2hStKX1dn0QY+VWumm+B40GNKbuhDE"
+		    	   					+ "4rY5cmBIVLsBYhD4g5r8YLN5NImFkGxd8g/T+UZezbnebkZP4nT3j7259HPoWxk3x"
+		    	   					+ "XTTReue7uVCb3Zd218tyWnnG+XeolYpk3fUAAAAAElFTkSuQmCC\">";
+		    	   
 		    	   if(this.file_request.equals(".")){
 		    		   
 		    		   directory = "/";
@@ -259,7 +290,7 @@ public class PrimeRun implements Runnable{
 		    	   				+ "<body bgcolor=\"white\">"
 		    	   				+ "<h1>Index of " + directory + "</h1>"
 		    	   				+ "<pre>"
-		    	   				+ "<table style=\"width:50%\">"
+		    	   				+ "<table style=\"width:60%\">"
 		    	   				).getBytes());
 		    	   
 		    	   // TABLE HEADER
@@ -330,22 +361,38 @@ public class PrimeRun implements Runnable{
 			    				   
 			    				   if(file_ext.equalsIgnoreCase("html")){
 			    					   os.write(("<td>"+img_text_html+"</td>").getBytes());
-			    					   actions = "<td><a href=\""+directory+file.getName()+"?zip=true"+"\">zip</a></td>"
-			    							   	+"<td><a href=\""+directory+file.getName()+"?asc=true"+"\">asc</a></td>"
-			    							   	+"<td><a href=\""+directory+file.getName()+"?asc=true&zip=true"+"\">asc+zip</a></td>";
+			    					   actions = "<td><a href=\""+directory+file.getName()+"?asc=true"+"\">asc</a></td>"
+			    							   	+"<td><a href=\""+directory+file.getName()+"?zip=true"+"\">zip</a></td>"
+			    							   	+"<td><a href=\""+directory+file.getName()+"?gzip=true"+"\">gz</a></td>"
+			    							   	+"<td><a href=\""+directory+file.getName()+"?asc=true&zip=true"+"\">asc+zip</a></td>"
+			    							   	+"<td><a href=\""+directory+file.getName()+"?asc=true&zip=true&gzip=true"+"\">asc+zip+gz</a></td>";
 			    				   
-			    				   }else if(file_ext.equalsIgnoreCase("txt")){
+			    				   }else if(file_ext.equalsIgnoreCase("txt") || file_ext.equalsIgnoreCase("xml") ){
 			    					   os.write(("<td>"+img_text_html+"</td>").getBytes());
-			    					   actions = "<td><a href=\""+directory+file.getName()+"?zip=true"+"\">zip</a></td>";
+			    					   actions = "<td><a href=\""+directory+file.getName()+"?zip=true"+"\">zip</a></td>"
+			    							   	+"<td><a href=\""+directory+file.getName()+"?gzip=true"+"\">gz</a></td>";
 			    					   
-			    				   }else if(file_ext.equalsIgnoreCase("jpg") || file_ext.equalsIgnoreCase("png")){
+			    				   }else if(file_ext.equalsIgnoreCase("jpg") || file_ext.equalsIgnoreCase("png") || file_ext.equalsIgnoreCase("gif")){
 			    					   os.write(("<td>"+img_img+"</td>").getBytes());
-			    					   actions = "<td><a href=\""+directory+file.getName()+"?zip=true"+"\">zip</a></td>";
-			    				   }
+			    					   actions = "<td><a href=\""+directory+file.getName()+"?zip=true"+"\">zip</a></td>"
+			    							   	+"<td><a href=\""+directory+file.getName()+"?gzip=true"+"\">gz</a></td>";
+			    					   
+			    				   }else if(file_ext.equalsIgnoreCase("zip") || file_ext.equalsIgnoreCase("gz")){
+			    					   
+			    					   os.write(("<td>"+img_comp+"</td>").getBytes());
+			    					   
+			    				   }else{
+				    				   
+				    				   os.write(("<td>" + img_unk + "</td>").getBytes());
+				    				   actions = "<td><a href=\""+directory+file.getName()+"?zip=true"+"\">zip</a></td>"
+			    							   	+"<td><a href=\""+directory+file.getName()+"?gzip=true"+"\">gz</a></td>";
+				    			   }
 			    				   
 			    			   }else{
 			    				   
 			    				   os.write(("<td>" + img_unk + "</td>").getBytes());
+			    				   actions = "<td><a href=\""+directory+file.getName()+"?zip=true"+"\">zip</a></td>"
+		    							   	+"<td><a href=\""+directory+file.getName()+"?gzip=true"+"\">gz</a></td>";
 			    			   }
 
 			    			   // File Name + Last Modified
@@ -388,30 +435,25 @@ public class PrimeRun implements Runnable{
 		    	   	// ====================
 		       		// 		READ FILE
 		       		// ====================
-		    	   
+		    	   	String fullFileName="";
 		    	   	this.fullData  = new byte [(int)myFile.length()];
 		    	   	FileInputStream fis = new FileInputStream(myFile);
 				    BufferedInputStream bis = new BufferedInputStream(fis);
 				    bis.read(this.fullData,0,this.fullData.length);
 				    bis.close();
 				    fis.close();
-		    	   
-		       		if(this.filetype.equalsIgnoreCase("html")){
+				    fullFileName = this.file_request;
+				    if(this.filetype.equalsIgnoreCase("html")){
 		       			
 		       			  this.type = "Content-Type: text/html\n\n";
-					       
+		       			  
 					       if((this.parameters != null)){
-					    	   
+					    	 
 					    	   if (this.parameters.containsKey("asc")){
 					    		   this.fullData = html2text(new String(this.fullData, "UTF-8")).getBytes();
-					    		   this.type = "Content-Type: text/html\n\n";
-						       }
-					    	   if (this.parameters.containsKey("zip")){
-					    		   this.fullData = zipBytes(this.file_request,this.fullData);
-					    		   this.type = "Content-Type: application/zip\nContent-Disposition: filename=\""+(file_request)+".zip\"\n\n";
-					    		   
+					    		   fullFileName += ".asc";
 					    	   }
-					    	    
+						       
 					       }
 					       
 			    	   
@@ -419,48 +461,53 @@ public class PrimeRun implements Runnable{
 			    	   
 			    	   this.type = "Content-Type: text/plain\n\n";
 				       
-				       if((this.parameters != null)){
-				    	   	
-				    	   if (this.parameters.containsKey("zip")){
-				    		   this.fullData = zipBytes(this.file_request,this.fullData);
-				    		   this.type = "Content-Type: application/zip\nContent-Disposition: filename=\""+(file_request)+".zip\"\n\n";
-				    		   
-				    	   }
-				    	    
-				       }
-			    	   
+			       }else if(this.filetype.equalsIgnoreCase("xml")){
+				 
+			    	   this.type = "Content-Type: application/xml\n\n";
+				       
 			       }else if(this.filetype.equalsIgnoreCase("jpg") || this.filetype.equalsIgnoreCase("jpeg")){
-			    	   
 			    	   
 			    	   this.type = "Content-Type: image/jpeg\n\n";
 				       
-				       if((this.parameters != null)){
-				    	   
-				    	   if (this.parameters.containsKey("zip")){
-				    		   this.fullData = zipBytes(this.file_request,fullData);
-				    		   this.type = "Content-Type: application/zip\nContent-Disposition: filename=\""+(file_request)+".zip\"\n\n";
-				    		   
-				    	   }
-				    	    
-				       }
-	
 			       }else if(this.filetype.equalsIgnoreCase("png")){
 				       
-				       
 			    	   this.type = "Content-Type: image/png\n\n";
+				        
+			       }else if(this.filetype.equalsIgnoreCase("gif")){
 				       
-				       if((this.parameters != null)){
-				    	   
+			    	   this.type = "Content-Type: image/gif\n\n";
+				       
+			       }else if(this.filetype.equalsIgnoreCase("zip")){
+				       
+			    	   this.type = "Content-Type: application/zip\nContent-Disposition: filename=\""+fullFileName+"\"\n\n";
+				       
+			       }else if(this.filetype.equalsIgnoreCase("gz")){
+				       
+			    	   this.type = "Content-Type: application/x-gzip\nContent-Disposition: filename=\""+fullFileName+"\"\n\n";
+				       
+			       }else{
+			    	   
+			    	   this.type = "Content-Type: application/octet-stream\n\n";
+			       }
+				    
+				    // COMUN PARAMETERS
+				    if((this.parameters != null)){
+			    	   	
 				    	   if (this.parameters.containsKey("zip")){
-				    		   this.fullData = zipBytes(this.file_request,fullData);
-				    		   this.type = "Content-Type: application/zip\nContent-Disposition: filename=\""+(file_request)+".zip\"\n\n";
+				    		   this.fullData = zipBytes(this.file_request,this.fullData);
+				    		   fullFileName += ".zip";
+				    		   this.type = "Content-Type: application/zip\nContent-Disposition: filename=\""+fullFileName+"\"\n\n";
+				    		   
+				    	   }
+				    	   if (this.parameters.containsKey("gzip")){
+				    		   this.fullData = gzipBytes(this.fullData);
+				    		   fullFileName += ".gz";
+				    		   this.type = "Content-Type: application/x-gzip\nContent-Disposition: filename=\""+fullFileName+"\"\n\n";
 				    		   
 				    	   }
 				    	    
 				       }
-				       
-			       }
-		       		
+			  
 		       		// ====================
 		       		// 		WRITE SOCKET
 		       		// ====================
@@ -471,7 +518,7 @@ public class PrimeRun implements Runnable{
 				       os.flush();				       
 				       os.close();
 				       this.br.close();
-				       
+				  
 		       		
 		      }else{
 		    	   
@@ -498,7 +545,10 @@ public class PrimeRun implements Runnable{
 		    		   
 		    		   os.write("HTTP/1.1 404 Not Found\n".getBytes());
 		    		   os.write("Content-Type: text/html\n\n".getBytes());
-		    		   os.write("<h1>HTTP Error 404</h1><h2>You failed, but I believe in you, so keep trying :)</h2><p>The Web server cannot find the file or script you asked for. Please check the URL to ensure that the path is correct.".getBytes());
+		    		   os.write(("<h1>HTTP Error 404</h1><img src=\"http://www.sherv.net/cm/emo/funny/2/big-dancing-banana-smiley-emoticon.gif\" align=\"center\" width=200px><h2>You failed, but I believe in you, so keep trying :)"
+		    		   		  + "</h2><p>The Web server cannot find the file or script you asked for. "
+		    		   		  + "Please check the URL to ensure that the path is correct."
+		    		   		  + "<br><br><a href=\"/"+"\">Home</a>").getBytes());
 		    		   os.flush();
 		    		   os.close();
 		    		   
