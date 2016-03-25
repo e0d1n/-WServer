@@ -102,7 +102,9 @@ public class RequestParse implements Runnable{
                     this.filetype = "";
                 }
 
+                /////////////////////////////////////////////////////////////////////////
                 System.out.println("Thread" + this.threadId + ": " + this.full_request );
+                /////////////////////////////////////////////////////////////////////////
 
                 File myFile = new File (this.file_request);
 
@@ -113,8 +115,8 @@ public class RequestParse implements Runnable{
                 if(myFile.isDirectory()){
 
                     String ignore[] = {".DS_Store"};
-                    DirectoryListing listing = new DirectoryListing(this.file_request,os,ignore);
-                    listing.list();
+                    DirectoryListing listing = new DirectoryListing(this.file_request,ignore);
+                    os.write(listing.getList().getBytes());
 
                 }
                 else if(myFile.exists()) {
@@ -136,9 +138,9 @@ public class RequestParse implements Runnable{
                         boolean zip = this.parameters.containsKey("zip");
                         boolean gzip = this.parameters.containsKey("gzip");
 
-                        if (asc){
+                        if (asc && this.filetype.equalsIgnoreCase("html")){
 
-                            is = new RemoveHTML(fis);
+                            is = new AsciiInputStream(fis);
                             fullFileName += ".asc";
 
                             if (!zip && !gzip){
@@ -184,37 +186,52 @@ public class RequestParse implements Runnable{
                     }
 
                     // IF NO VALID PARAMETER DEFAULT FILETYPE HEADERS
+                    
                     if(!valid_parameter){
 
+                    	String header_type = "";
+                    	
                         if(this.filetype.equalsIgnoreCase("html")){
 
-                            os.write("Content-Type: text/html\n\n".getBytes());
+                            header_type = "text/html";
 
                         }else if(this.filetype.equalsIgnoreCase("txt")){
 
-                            os.write("Content-Type: text/plain\n\n".getBytes());
+                            header_type = "text/plain";
 
                         }else if(this.filetype.equalsIgnoreCase("xml")){
 
-                            os.write("Content-Type: application/xml\n\n".getBytes());
+                            header_type = "application/xml";
 
                         }else if(this.filetype.equalsIgnoreCase("png")){
 
-                            os.write("Content-Type: image/png\n\n".getBytes());
+                            header_type = "image/png";
 
                         }else if(this.filetype.equalsIgnoreCase("jpeg") || this.filetype.equalsIgnoreCase("jpg")){
 
-                            os.write("Content-Type: image/jpeg\n\n".getBytes());
+                            header_type = "image/jpeg";
 
                         }else if(this.filetype.equalsIgnoreCase("gif")){
 
-                            os.write("Content-Type: image/gif\n\n".getBytes());
+                            header_type = "image/gif";
 
+                        }else if(this.filetype.equalsIgnoreCase("zip")){
+
+                            header_type = "application/zip";
+
+                        }else if(this.filetype.equalsIgnoreCase("gz")){
+
+                            header_type = "application/x-gzip";
+                            
                         }else{
 
-                            os.write("Content-Type: application/octet-stream\n\n".getBytes());
+                            header_type = "application/octet-stream";
 
                         }
+                        
+                        // WRITE HEADER
+                        
+                        os.write(("Content-Type: " + header_type +"\n\n").getBytes());
 
                     }
 

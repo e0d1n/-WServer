@@ -4,25 +4,25 @@ import java.util.Arrays;
 
 public class DirectoryListing {
 
-    private OutputStream os;
     private String[] ignore;
     private String name;
 
-    DirectoryListing(String name, OutputStream so,String[] ignore_files){
+    DirectoryListing(String name,String[] ignore_files){
 
         this.name = name;
-        this.os = so;
         this.ignore = ignore_files;
 
     }
 
-    void list() throws IOException{
+    String getList() throws IOException{
+    	
         // ========================
         // 	DIRECTORY LISTING
         // ========================
 
         // IGNORE FILES
-
+    	
+    	String html="";
         String directory;
         File myFile = new File(this.name);
         File[] filesList = myFile.listFiles();
@@ -159,18 +159,18 @@ public class DirectoryListing {
             directory = "/"+this.name;
         }
 
-        os.write("HTTP/1.1 200 OK\n".getBytes());
-        os.write("Content-Type: text/html\n\n".getBytes());
-        os.write(("<html>"
+        html += ("HTTP/1.1 200 OK\n");
+        html +=("Content-Type: text/html\n\n");
+        html +=(("<html>"
                     + "<head><title>Index of "+ directory +"</title></head>"
                     + "<body bgcolor=\"white\">"
                     + "<h1>Index of " + directory + "</h1>"
                     + "<pre>"
                     + "<table style=\"width:60%\">"
-                 ).getBytes());
+                 ));
 
         // TABLE HEADER
-        os.write(("<tr>"
+        html +=(("<tr>"
                     + "<th align=\"left\"></th>"
                     + "<th align=\"left\">Name</th>"
                     + "<th align=\"left\">Last modified</th>"
@@ -182,12 +182,12 @@ public class DirectoryListing {
                     + "<hr size=\"2\" width=\"100%\"/>"
                     + "</td>"
                     + "</tr>"
-                 ).getBytes());
+                 ));
 
         // BACK POINTS + ARROW
         if(!directory.equals("/")){
 
-            os.write(("<tr>"
+            html +=(("<tr>"
                         + "<td></td>"
                         + "<td>"
                         + "<a href=\"./\">.</a>"
@@ -199,7 +199,7 @@ public class DirectoryListing {
                         + "<a href=\"../\">...</a>"
                         + "</td>"
                         + "</tr>"
-                     ).getBytes());
+                     ));
 
         }
 
@@ -216,16 +216,16 @@ public class DirectoryListing {
 
             if(!Arrays.asList(ignore).contains(file_name)){
 
-                os.write("<tr>".getBytes());
+                html +=("<tr>");
 
                 if (file.isDirectory()) {
 
-                    os.write(("<td>"+img_fol+"</td>"
+                    html +=(("<td>"+img_fol+"</td>"
                                 + "<td>"
                                 + "<a href=\""+directory+file.getName()+"/"+"\">"+file.getName()+"</a>"
                                 + "</td>"
                                 + "<td>"+format.format(file.lastModified())+"</td>"
-                                + "<td>"+" - "+"</td>").getBytes());
+                                + "<td>"+" - "+"</td>"));
 
                 }else{
 
@@ -240,37 +240,37 @@ public class DirectoryListing {
                     // IMG's + Actions
                     if(file_ext.equalsIgnoreCase("html")){
 
-                        os.write(("<td>"+img_text_html+"</td>").getBytes());
+                        html +=(("<td>"+img_text_html+"</td>"));
                         actions +="<td style=\"text-align:center\"><a href=\""+directory+file.getName()+"?asc=true"+"\">asc</a></td>"
                             +"<td style=\"text-align:center\"><a href=\""+directory+file.getName()+"?asc=true&zip=true"+"\">asc+zip</a></td>"
                             +"<td style=\"text-align:center\"><a href=\""+directory+file.getName()+"?asc=true&zip=true&gzip=true"+"\">asc+zip+gz</a></td>";
 
                     }else if(file_ext.equalsIgnoreCase("txt") || file_ext.equalsIgnoreCase("xml") ){
 
-                        os.write(("<td>"+img_text_html+"</td>").getBytes());
+                        html +=(("<td>"+img_text_html+"</td>"));
 
 
                     }else if(file_ext.equalsIgnoreCase("jpg") || file_ext.equalsIgnoreCase("png") || file_ext.equalsIgnoreCase("gif")){
 
-                        os.write(("<td>"+img_img+"</td>").getBytes());
+                        html +=(("<td>"+img_img+"</td>"));
 
 
                     }else if(file_ext.equalsIgnoreCase("zip") || file_ext.equalsIgnoreCase("gz")){
 
-                        os.write(("<td>"+img_comp+"</td>").getBytes());
+                        html +=(("<td>"+img_comp+"</td>"));
                         actions = "";
 
                     }else{
 
-                        os.write(("<td>" + img_unk + "</td>").getBytes());
+                        html +=(("<td>" + img_unk + "</td>"));
 
                     }
 
                     // File Name + Last Modified
-                    os.write(("<td>"
+                    html +=(("<td>"
                                 + "<a href=\""+directory+file.getName()+"\">"+file.getName()+"</a>"
                                 + "</td>"
-                                + "<td>"+format.format(file.lastModified())+"</td>").getBytes());
+                                + "<td>"+format.format(file.lastModified())+"</td>"));
 
                     // FIle Size
                     if(file.length() > 1024){
@@ -280,15 +280,15 @@ public class DirectoryListing {
                         size = String.valueOf(file.length()) ;
                     }
 
-                    os.write(("<td>"+size+"</td>").getBytes());
-                    os.write((actions).getBytes());
+                    html +=(("<td>"+size+"</td>"));
+                    html +=((actions));
                 }
 
-                os.write(("</tr>").getBytes());
+                html +=(("</tr>"));
             }
         }
 
-        os.write(("<tr>"
+        html +=(("<tr>"
                     + "<td colspan=\"10\">"
                     + "<hr size=\"2\" width=\"100%\"/>"
                     + "</td>"
@@ -296,9 +296,9 @@ public class DirectoryListing {
                     + "</table>"
                     + "</pre>"
                     + "</body>"
-                    + "</html>").getBytes());
-        os.flush();
-        os.close();
+                    + "</html>"));
+        
+        return html;
 
     }
 }
