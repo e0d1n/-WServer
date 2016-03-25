@@ -2,11 +2,25 @@ import java.io.*;
 import java.text.*;
 import java.util.Arrays;
 
+/**
+ * The Class DirectoryListing, gets the HTML page like Apache of files 
+ * in the directory named while instantiating, also removes from the list,
+ * ignored files.
+ */
 public class DirectoryListing {
 
+    /** Ignore files array. */
     private String[] ignore;
+    
+    /** Directory name. */
     private String name;
 
+    /**
+     * Instantiates a new directory listing.
+     *
+     * @param name - Directory name
+     * @param ignore_files - Ignore files array
+     */
     DirectoryListing(String name,String[] ignore_files){
 
         this.name = name;
@@ -14,7 +28,13 @@ public class DirectoryListing {
 
     }
 
-    String getList() throws IOException{
+    /**
+     * Gets the HTML page like Apache of files in the directory.
+     *
+     * @return HTML page (String)
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public String getList() throws IOException{
     	
         // ========================
         // 	DIRECTORY LISTING

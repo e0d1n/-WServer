@@ -3,23 +3,54 @@ import java.net.*;
 import java.util.*;
 import java.util.zip.*;
 
+/**
+ * The Class RequestParse receive a socket from RequestListener,
+ * and serve to the Output socket the Input petition.
+ * @see RequestListener
+ */
 public class RequestParse implements Runnable{
 
+    /** The is. */
     private InputStream is;
+    
+    /** The os. */
     private OutputStream os;
+    
+    /** The parameters. */
     private Map<String, String> parameters;
+    
+    /** The socket2. */
     private Socket socket2;
+    
+    /** The full_request. */
     private String full_request;
+    
+    /** The file_request. */
     private String file_request;
+    
+    /** The filetype. */
     private String filetype;
+    
+    /** The file_tokens. */
     private String[] file_tokens;
+    
+    /** The br_i. */
     private BufferedReader br_i;
+    
+    /** The parameters_request. */
     private String parameters_request;
 
+    /** The thread id. */
     /////////////////////////////////
-    long threadId;
+    private long threadId;
     /////////////////////////////////
 
+    /**
+     * Parameters_ split.
+     *
+     * @param query URL string with all parameters to split
+     * @return map of all URL parameters
+     */
     public static Map<String, String> parameters_Split(String query)
     {
         String[] params = query.split("&");
@@ -40,11 +71,19 @@ public class RequestParse implements Runnable{
         return map;
     }
 
+    /**
+     * Instantiates a new request parse.
+     *
+     * @param socket2 - requested socked
+     */
     RequestParse(Socket socket2) {
 
         this.socket2 = socket2;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Runnable#run()
+     */
     public void run() {
 
         try{
